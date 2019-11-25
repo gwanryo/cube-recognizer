@@ -230,13 +230,13 @@ def recognize(num):
         faceValidate = validate()
         if faceValidate:
             return {
-                success: True
-                cube: CUBE
+                "success": 1,
+                "cube": CUBE
             }
 
     return {
-        success: False
-        cube: CUBE
+        "success": 0,
+        "cube": CUBE
     }
 
 # Try recognition as given number
@@ -252,13 +252,13 @@ def recognize(num, brightness):
         faceValidate = validate()
         if faceValidate:
             return {
-                success: True
-                cube: CUBE
+                "success": 1,
+                "cube": CUBE
             }
 
     return {
-        success: False
-        cube: CUBE
+        "success": 0,
+        "cube": CUBE
     }
     
 
