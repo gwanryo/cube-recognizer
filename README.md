@@ -1,7 +1,7 @@
-[![GitHub issues](https://img.shields.io/github/issues/gwanryo/cube-step-solver)](https://github.com/gwanryo/cube-step-solver/issues)
-[![GitHub forks](https://img.shields.io/github/forks/gwanryo/cube-step-solver)](https://github.com/gwanryo/cube-step-solver/network)
-[![GitHub stars](https://img.shields.io/github/stars/gwanryo/cube-step-solver)](https://github.com/gwanryo/cube-step-solver/stargazers)
-[![GitHub license](https://img.shields.io/github/license/gwanryo/cube-step-solver)](https://github.com/gwanryo/cube-step-solver/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/gwanryo/cube-recognizer)](https://github.com/gwanryo/cube-recognizer/issues)
+[![GitHub forks](https://img.shields.io/github/forks/gwanryo/cube-recognizer)](https://github.com/gwanryo/cube-recognizer/network)
+[![GitHub stars](https://img.shields.io/github/stars/gwanryo/cube-recognizer)](https://github.com/gwanryo/cube-recognizer/stargazers)
+[![GitHub license](https://img.shields.io/github/license/gwanryo/cube-recognizer)](https://github.com/gwanryo/cube-recognizer/blob/master/LICENSE)
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
@@ -31,7 +31,7 @@ pip install opencv-python
 
 1. Clone the repo:
 ```sh
-git clone https://github.com/gwanryo/cube-step-solver.git
+git clone https://github.com/gwanryo/cube-recognizer.git
 ```
 2. Run program:
 ```sh
