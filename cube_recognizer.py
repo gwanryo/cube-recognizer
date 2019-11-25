@@ -1,7 +1,7 @@
 import cv2, math, time
 import numpy as np
 import json
-import cube_light as cl
+from . import cube_light as cl
 
 '''
 This program is rubix cube color recognizer using OpenCV
