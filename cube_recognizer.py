@@ -213,8 +213,8 @@ def recognize():
     cubeRecognize()
     faceValidate = validate()
     return {
-        success: True if faceValidate else False
-        cube: CUBE
+        "success": 1 if faceValidate else 0,
+        "cube": CUBE
     }
 
 # Try recognition as given number
