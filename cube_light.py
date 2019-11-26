@@ -11,7 +11,7 @@ LED_COUNT       = 16        # Number of LED pixels.
 LED_PIN         = 18        # GPIO pin connected to the pixels (18 uses PWM!).
 LED_FREQ_HZ     = 800000    # LED signal frequency in hertz (usually 800khz)
 LED_DMA         = 10        # DMA channel to use for generating signal (try 10)
-LED_BRIGHTNESS  = 255       # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS  = 30       # Set to 0 for darkest and 255 for brightest
 LED_INVERT      = False     # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL     = 0         # set to '1' for GPIOs 13, 19, 41, 45 or 53
 STRIP           = None      
@@ -21,6 +21,7 @@ def readConfig(file):
     with open(file, 'r') as f:
         config = json.load(f)
 
+    global LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_BRIGHTNESS, LED_INVERT, LED_CHANNEL, STRIP
     LED_COUNT = config['LED_COUNT']
     LED_PIN = config['LED_PIN']
     LED_FREQ_HZ = config['LED_FREQ_HZ']
@@ -34,6 +35,7 @@ def readConfig(file):
 
 # Read config
 def reloadConfig(file):
+    data = {}
     data['LED_COUNT'] = LED_COUNT
     data['LED_PIN'] = LED_PIN
     data['LED_FREQ_HZ'] = LED_FREQ_HZ
@@ -55,7 +57,7 @@ def colorWipe(color, wait_ms=50):
         time.sleep(wait_ms/1000.0)
 
 # Clear whole led lights
-def clearWipe(color, wait_ms=50):
+def clearWipe(wait_ms=50):
     colorWipe(Color(0, 0, 0), 10)
 
 # Set LED Brightness
@@ -63,26 +65,22 @@ def setBrightness(num):
     if num > 255 or num < 0:
         return False
     
+    global LED_BRIGHTNESS
     LED_BRIGHTNESS = num
 
     try:
         clearWipe()
-        reloadConfig()
+        reloadConfig(LIGHT_CONFIG)
         return True
     except:
         return False
 
-# Wipe whole led to white color
-def whiteWipe():
-    if not STRIP:
-        readConfig(LIGHT_CONFIG)
-
-    colorWipe(Color(255, 255, 255), 10)
-
 # Whipe whole led in specific brightness
-def whiteWipe(num):
+def whiteWipe(brightness = LED_BRIGHTNESS):
     if not STRIP:
         readConfig(LIGHT_CONFIG)
         
-    setBrightness(num)
+    if brightness != LED_BRIGHTNESS:
+        setBrightness(brightness)
+
     colorWipe(Color(255, 255, 255), 10)

@@ -1,21 +1,21 @@
 import cv2, math, time
 import numpy as np
 import json
-from . import cube_light as cl
+from cube_light import cube_light as cl
 
 '''
 This program is rubix cube color recognizer using OpenCV
 2019. 11. 08
 '''
 
-cameras                 = []            # Sets of camera
-screens                 = []            # Sets of camera view
+CAMERAS                 = []            # Sets of camera
+SCREENS                 = []            # Sets of camera view
 
 CONFIG_FILE             = 'cube.json'   # Read from config, else use default value
 
 CAMERA_OFFSET           = 0             # Offset of camera quantity                     # Don't recommend changing this value
 CAMERA_QUANTITY         = 2             # Quantity of camera                            # Don't recommend changing this value
-CAMERA_DELAY            = 2             # Total camera delay                            # If you reads 3 times, 1s of delay are given to each cameras
+CAMERA_DELAY            = 2             # Total camera delay                            # If you reads 3 times, 1s of delay are given to each CAMERAS
 CAMERA_TIMES            = 3             # Number of camera shots
 CAMERA_WIDTH            = 320           # Width of camera
 CAMERA_HEIGHT           = 240           # Height of camera
@@ -65,9 +65,9 @@ def calAvgColor(a, b, c, x, y, offset):
     avgA = 0; avgB = 0; avgC = 0
     for aY in range(fromY, toY):
         for aX in range(fromX, toX):
-            avgA += a[y, x]
-            avgB += b[y, x]
-            avgC += c[y, x]
+            avgA += a[aY, aX]
+            avgB += b[aY, aX]
+            avgC += c[aY, aX]
 
     powOffset = offset * offset
     avgA = math.floor(avgA / powOffset)
@@ -140,26 +140,26 @@ def validate():
             else:
                 faceColor[color] = 0
 
-    for count in faceColor.values():
+    for count in faceColor:
         if count != faceQuantity:
             return False
-    
+
     return True
 
 def cubeRecognize():
-    if len(cameras) == 0:
+    if len(CAMERAS) == 0:
         readConfig(CONFIG_FILE)
 
     for i in range(CAMERA_OFFSET, CAMERA_OFFSET + CAMERA_QUANTITY + 1):
-        cameras.append(cv2.VideoCapture(i))
+        CAMERAS.append(cv2.VideoCapture(i))
 
-    for cam in cameras:
+    for cam in CAMERAS:
         cam.set(3, CAMERA_WIDTH)    # cv2.CAP_PROP_FRAME_HEIGHT
         cam.set(4, CAMERA_HEIGHT)   # cv2.CAP_PROP_FRAME_WIDTH
-    
+
     for i in range(0, CAMERA_TIMES + 1):
-        for cam in cameras:
-            ret, frame = cam.read()
+        for cam in CAMERAS:
+            _, frame = cam.read()
 
             # Calculate YCrCb color range
             YCrCb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
@@ -186,7 +186,7 @@ def cubeRecognize():
                 cubeObj.append(CUBE[3])
                 cubeObj.append(CUBE[4])
                 cubeObj.append(CUBE[5])
-            # ... Add something if you have more cameras
+            # ... Add something if you have more CAMERAS
 
             # Write face info, and x, y value in camera view
             drawPos(cubeObj, frame)
@@ -199,31 +199,20 @@ def cubeRecognize():
 
         # Grouping same color
         groupColor()
-        
+
         # Delay time for slow speed CPU
-        time.sleep(CAMERA_DELAY / CAMERA_TIMES / len(cameras))
+        time.sleep(CAMERA_DELAY / CAMERA_TIMES / len(CAMERAS))
 
         # Print grouping color of each cube face
         for obj in CUBE:
             print(obj['face'] + '-' + ''.join(obj['faceString']))
 
-# Try recognition once
-def recognize():
-    cl.whiteWipe()
-    cubeRecognize()
-    faceValidate = validate()
-    return {
-        "success": 1 if faceValidate else 0,
-        "cube": CUBE
-    }
-
 # Try recognition as given number
-def recognize(num):
-    if num < 0:
-        return False
-    
+def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
     faceValidate = False
-    cl.whiteWipe()
+
+    if brightness != cl.LED_BRIGHTNESS:
+        cl.whiteWipe(brightness)
 
     for i in range(0, num):
         cubeRecognize()
@@ -239,28 +228,6 @@ def recognize(num):
         "cube": CUBE
     }
 
-# Try recognition as given number
-def recognize(num, brightness):
-    if num < 0:
-        return False
-    
-    faceValidate = False
-    cl.whiteWipe(brightness)
-
-    for i in range(0, num):
-        cubeRecognize()
-        faceValidate = validate()
-        if faceValidate:
-            return {
-                "success": 1,
-                "cube": CUBE
-            }
-
-    return {
-        "success": 0,
-        "cube": CUBE
-    }
-    
 
 if __name__ == "__main__":
     main()
@@ -274,7 +241,7 @@ def renderWindow(title, screen, x, y):
 def showWindow(i, cam, bgr, nY, nCr, nCb):
     # Define various camera view
     # Edit it if you want
-    screens = [
+    SCREENS = [
         [
             'Camera{} - nY'.format(i), 
             nY, 
@@ -302,7 +269,7 @@ def showWindow(i, cam, bgr, nY, nCr, nCb):
     ]
 
     # Rendering windows for each pre-defined camera view
-    for screen in screens:
+    for screen in SCREENS:
         renderWindow(screen[0], screen[1], screen[2], screen[3])
 
     # If you want to save some images, use this function
@@ -320,16 +287,16 @@ def main():
     readConfig(CONFIG_FILE)
 
     for i in range(CAMERA_OFFSET, CAMERA_OFFSET + CAMERA_QUANTITY + 1):
-        cameras.append(cv2.VideoCapture(i))
+        CAMERAS.append(cv2.VideoCapture(i))
 
-    for cam in cameras:
+    for cam in CAMERAS:
         cam.set(3, CAMERA_WIDTH)  # cv2.CAP_PROP_FRAME_HEIGHT
         cam.set(4, CAMERA_HEIGHT)  # cv2.CAP_PROP_FRAME_WIDTH
 
     while True:
         #clearCube()
 
-        for i, cam in enumerate(cameras):
+        for i, cam in enumerate(CAMERAS):
             ret, frame = cam.read()
 
             # Calculate YCrCb color range
@@ -357,7 +324,7 @@ def main():
                 cubeObj.append(CUBE[3])
                 cubeObj.append(CUBE[4])
                 cubeObj.append(CUBE[5])
-            # ... Add something if you have more cameras
+            # ... Add something if you have more CAMERAS
 
             # Write face info, and x, y value in camera view
             drawPos(cubeObj, frame)
@@ -373,6 +340,6 @@ def main():
             print(obj['face'] + '-' + ''.join(obj['faceString']))
 
         # Delay time for slow speed CPU
-        time.sleep(CAMERA_DELAY / CAMERA_TIMES / len(cameras))
+        time.sleep(CAMERA_DELAY / CAMERA_TIMES / len(CAMERAS))
 
     cv2.destroyAllWindows()
