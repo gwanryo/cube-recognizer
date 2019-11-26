@@ -1,8 +1,7 @@
 import cv2, math, time
 import numpy as np
 import json
-import importlib
-cl = importlib.import_module('cube_light')
+from cube_light import *
 
 '''
 This program is rubix cube color recognizer using OpenCV
@@ -209,11 +208,11 @@ def cubeRecognize():
             print(obj['face'] + '-' + ''.join(obj['faceString']))
 
 # Try recognition as given number
-def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
+def recognize(num = 5, brightness = LED_BRIGHTNESS):
     faceValidate = False
 
-    if brightness != cl.LED_BRIGHTNESS:
-        cl.whiteWipe(brightness)
+    if brightness != LED_BRIGHTNESS:
+        whiteWipe(brightness)
 
     for _ in range(0, num):
         cubeRecognize()
