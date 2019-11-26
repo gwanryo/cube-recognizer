@@ -214,7 +214,7 @@ def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
     if brightness != cl.LED_BRIGHTNESS:
         cl.whiteWipe(brightness)
 
-    for i in range(0, num):
+    for _ in range(0, num):
         cubeRecognize()
         faceValidate = validate()
         if faceValidate:
