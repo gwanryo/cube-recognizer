@@ -26,8 +26,7 @@ CAMERA_URL              = [             # Set camera streaming url
     'http://localhost:8081/?action=stream'
 ]
 
-CAMERA_DELAY            = 2             # Total camera delay                            # If you reads 3 times, 1s of delay are given to each CAMERAS
-CAMERA_TIMES            = 3             # Number of camera shots
+CAMERA_DELAY            = 0.5           # Total camera delay
 CAMERA_WIDTH            = 320           # Width of camera
 CAMERA_HEIGHT           = 240           # Height of camera
 
@@ -45,13 +44,25 @@ def readConfig(file):
     with open(file, 'r') as f:
         config = json.load(f)
 
+    global CAMERA_URL, CAMERA_DELAY
     CAMERA_URL = config['CAMERA_URL']
-    CAMERA_DELAY, CAMERA_TIMES = config['CAMERA_DELAY'], config['CAMERA_TIMES']
+
+    global CAMERA_WIDTH, CAMERA_HEIGHT
     CAMERA_WIDTH, CAMERA_HEIGHT = config['CAMERA_WIDTH'], config['CAMERA_HEIGHT']
+
+    global RENDER_BASE_X, RENDER_BASE_Y
     RENDER_BASE_X, RENDER_BASE_Y = config['RENDER_BASE_X'], config['RENDER_BASE_Y']
+
+    global RENDER_TITLEBAR_HEIGHT
     RENDER_TITLEBAR_HEIGHT = config['RENDER_TITLEBAR_HEIGHT']
+
+    global COLOR_AVERAGE_OFFSET
     COLOR_AVERAGE_OFFSET = config['COLOR_AVERAGE_OFFSET']
+
+    global COLOR_DISTANCE_OFFSET
     COLOR_DISTANCE_OFFSET = config['COLOR_DISTANCE_OFFSET']
+
+    global CUBE
     CUBE = config['CUBE']
 
 # Draw green circle on selected points
@@ -93,7 +104,14 @@ def saveColor(cubeObj, a, b, c):
         for i, pixel in enumerate(obj['pixel']):
             x = pixel[0]; y = pixel[1]
             avgA, avgB, avgC = calAvgColor(a, b, c, x, y, COLOR_AVERAGE_OFFSET)
-            obj['color'][i] = (avgA, avgB, avgC)
+
+            if len(obj['color'][i]) == 3:
+                obj['color'][i] = ((obj['color'][i][0] + avgA) / 2,
+                                    (obj['color'][i][1] + avgB) / 2,
+                                    (obj['color'][i][2] + avgC) / 2)
+            else:
+                obj['color'][i] = (avgA, avgB, avgC)
+
             if i == 4: obj['center'] = (avgA, avgB, avgC)
 
 # Calculate distance in color
@@ -142,9 +160,8 @@ def validate():
             # Return false if faceString member has numerical value (initial value)
             try:
                 int(obj['faceString'])
+            except:
                 return False
-            except ValueError:
-                pass
 
             if faceColor[color]:
                 faceColor[color] += 1
@@ -162,61 +179,60 @@ def cubeRecognize():
         readConfig(CONFIG_FILE)
 
     for u in CAMERA_URL:
-        CAMERAS.append(cv2.VideoCapture(s))
+        CAMERAS.append(cv2.VideoCapture(u))
 
     for cam in CAMERAS:
         cam.set(3, CAMERA_WIDTH)    # cv2.CAP_PROP_FRAME_HEIGHT
         cam.set(4, CAMERA_HEIGHT)   # cv2.CAP_PROP_FRAME_WIDTH
 
-    for i in range(0, CAMERA_TIMES + 1):
-        for cam in CAMERAS:
-            _, frame = cam.read()
+    for i, cam in enumerate(CAMERAS):
+        _, frame = cam.read()
 
-            # Calculate YCrCb color range
-            YCrCb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
-            Y, Cr, Cb = cv2.split(YCrCb)
-            nY = cv2.normalize(Y, None, 0, 255, cv2.NORM_MINMAX)
-            nCr = cv2.normalize(Cr, None, 0, 255, cv2.NORM_MINMAX)
-            nCb = cv2.normalize(Cb, None, 0, 255, cv2.NORM_MINMAX)
+        # Calculate YCrCb color range
+        YCrCb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+        Y, Cr, Cb = cv2.split(YCrCb)
+        nY = cv2.normalize(Y, None, 0, 255, cv2.NORM_MINMAX)
+        nCr = cv2.normalize(Cr, None, 0, 255, cv2.NORM_MINMAX)
+        nCb = cv2.normalize(Cb, None, 0, 255, cv2.NORM_MINMAX)
 
-            # Calculate HSV color range
-            HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            H, S, V = cv2.split(HSV)
-            nH = cv2.normalize(H, None, 0, 255, cv2.NORM_MINMAX)
-            nS = cv2.normalize(S, None, 0, 255, cv2.NORM_MINMAX)
-            nV = cv2.normalize(V, None, 0, 255, cv2.NORM_MINMAX)
+        # Calculate HSV color range
+        HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        H, S, V = cv2.split(HSV)
+        nH = cv2.normalize(H, None, 0, 255, cv2.NORM_MINMAX)
+        nS = cv2.normalize(S, None, 0, 255, cv2.NORM_MINMAX)
+        nV = cv2.normalize(V, None, 0, 255, cv2.NORM_MINMAX)
 
-            # Camera 1 = B, R, D
-            # Camera 2 = U, L, F
-            cubeObj = []
-            if i == 0:
-                cubeObj.append(CUBE[0])
-                cubeObj.append(CUBE[1])
-                cubeObj.append(CUBE[2])
-            elif i == 1:
-                cubeObj.append(CUBE[3])
-                cubeObj.append(CUBE[4])
-                cubeObj.append(CUBE[5])
-            # ... Add something if you have more CAMERAS
+        # Camera 1 = B, R, D
+        # Camera 2 = U, L, F
+        cubeObj = []
+        if i == 0:
+            cubeObj.append(CUBE[0])
+            cubeObj.append(CUBE[1])
+            cubeObj.append(CUBE[2])
+        elif i == 1:
+            cubeObj.append(CUBE[3])
+            cubeObj.append(CUBE[4])
+            cubeObj.append(CUBE[5])
+        # ... Add something if you have more CAMERAS
 
-            # Write face info, and x, y value in camera view
-            drawPos(cubeObj, frame)
+        # Write face info, and x, y value in camera view
+        drawPos(cubeObj, frame)
 
-            # Save center color, and 9 face colors
-            saveColor(cubeObj, nY, nCr, nCb)
+        # Save center color, and 9 face colors
+        saveColor(cubeObj, nY, nCr, nCb)
 
-            if __name__ == "__main__":
-                showWindow(i, cam, frame, nY, nCr, nCb)
-
-        # Grouping same color
-        groupColor()
+        if __name__ == "__main__":
+            showWindow(i, cam, frame, nY, nCr, nCb)
 
         # Delay time for slow speed CPU
-        time.sleep(CAMERA_DELAY / CAMERA_TIMES / len(CAMERAS))
+        time.sleep(CAMERA_DELAY / len(CAMERAS))
 
-        # Print grouping color of each cube face
-        for obj in CUBE:
-            print(obj['face'] + '-' + ''.join(obj['faceString']))
+    # Grouping same color
+    groupColor()
+
+    # Print grouping color of each cube face
+    for obj in CUBE:
+        print(obj['face'] + '-' + ''.join(obj['faceString']))
 
 # Try recognition as given number
 def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
@@ -226,6 +242,8 @@ def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
         cl.whiteWipe(brightness)
 
     for _ in range(0, num):
+        if CUBE:
+            clearCube()
         cubeRecognize()
         faceValidate = validate()
         if faceValidate:
