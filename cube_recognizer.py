@@ -13,8 +13,11 @@ SCREENS                 = []            # Sets of camera view
 
 CONFIG_FILE             = 'cube.json'   # Read from config, else use default value
 
-CAMERA_OFFSET           = 0             # Offset of camera quantity                     # Don't recommend changing this value
-CAMERA_QUANTITY         = 2             # Quantity of camera                            # Don't recommend changing this value
+CAMERA_URL              = [             # Set camera streaming url
+    'http://localhost:8080/?action=stream',
+    'http://localhost:8081/?action=stream'
+]
+
 CAMERA_DELAY            = 2             # Total camera delay                            # If you reads 3 times, 1s of delay are given to each CAMERAS
 CAMERA_TIMES            = 3             # Number of camera shots
 CAMERA_WIDTH            = 320           # Width of camera
@@ -34,7 +37,7 @@ def readConfig(file):
     with open(file, 'r') as f:
         config = json.load(f)
 
-    CAMERA_OFFSET, CAMERA_QUANTITY = config['CAMERA_OFFSET'], config['CAMERA_QUANTITY']
+    CAMERA_URL = config['CAMERA_URL']
     CAMERA_DELAY, CAMERA_TIMES = config['CAMERA_DELAY'], config['CAMERA_TIMES']
     CAMERA_WIDTH, CAMERA_HEIGHT = config['CAMERA_WIDTH'], config['CAMERA_HEIGHT']
     RENDER_BASE_X, RENDER_BASE_Y = config['RENDER_BASE_X'], config['RENDER_BASE_Y']
@@ -150,8 +153,8 @@ def cubeRecognize():
     if len(CAMERAS) == 0:
         readConfig(CONFIG_FILE)
 
-    for i in range(CAMERA_OFFSET, CAMERA_OFFSET + CAMERA_QUANTITY + 1):
-        CAMERAS.append(cv2.VideoCapture(i))
+    for u in CAMERA_URL:
+        CAMERAS.append(cv2.VideoCapture(s))
 
     for cam in CAMERAS:
         cam.set(3, CAMERA_WIDTH)    # cv2.CAP_PROP_FRAME_HEIGHT
