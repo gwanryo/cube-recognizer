@@ -1,8 +1,15 @@
 import cv2, math, time
 import numpy as np
 import json
-import importlib
-cl = importlib.import_module('cube_light.cube_light')
+
+if __name__ == "__main__":
+    import sys
+    from os import path
+    print(path.dirname(path.dirname(path.abspath(__file__))))
+    sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
+    import cube_light as cl
+else:
+    from . import cube_light as cl
 
 '''
 This program is rubix cube color recognizer using OpenCV
@@ -235,7 +242,6 @@ def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
 
 if __name__ == "__main__":
     main()
-
 
 # Render camera screen to window
 def renderWindow(title, screen, x, y):
