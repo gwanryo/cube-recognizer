@@ -35,7 +35,13 @@ RENDER_BASE_Y           = 0             # Starting y points of camera view windo
 RENDER_TITLEBAR_HEIGHT  = 33            # Window Titlebar                               # Change it depends on your environment
 
 COLOR_AVERAGE_OFFSET    = 3             # Get average of color pixels in offset * offset square pixels
-COLOR_DISTANCE_OFFSET   = 100           # Distance offset of grouping same colors
+COLOR_DISTANCE_OFFSET   = 50            # Distance offset of grouping same colors
+COLOR_CHROMATIC         = {             # To classify colors in specific range
+    "C": ["Y", "G", "B", "RO"],
+    "H": [13, 45, 92, 150],
+    "S": 70,
+    "V": 0
+}
 
 CUBE = None                             # Cube Object                                   # It defines 6 cube faces, including their position in camera, etc
 
@@ -138,6 +144,77 @@ def groupColor():
 
                 i += 1
 
+# Find face string using color string
+def findFaceUsingColor(c):
+    global CUBE
+
+    for obj in CUBE:
+        if obj['centerColor'] == c:
+            return obj['face']
+
+# Set center color using specific range
+def setCenterColor():
+    global CUBE, COLOR_CHROMATIC
+    cC = COLOR_CHROMATIC['C']; cH = COLOR_CHROMATIC['H']; cS = COLOR_CHROMATIC['S']
+
+    for obj in CUBE:
+        h, s, v = CUBE['center']
+        if obj['centerColor'] == "":
+            if s <= cS:
+                obj['centerColor'] = "W"
+            else:
+                for ch, cs, cv in obj['color']:
+                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[:1])):
+                        if lower <= ch and ch < upper:
+                            obj['centerColor'] = colorStr
+
+                    if ch < cH[0] or ch >= cH[-1]:
+                        obj['centerColor'] = "RO"
+
+# Classify Red and Orange
+def classifyRedOrange(roList):
+    global CUBE
+    face = len(CUBE[0]['color'])
+
+    if len(roList) != face * 2:
+        print("classify Red & Orange failed! length of roList is {}".format(len(roList)))
+    
+    sorted(roList, key=lambda x: x[-1])
+
+    for k, n, i, c in enumerate(roList):
+        if k < length:
+            CUBE[n]['faceString'][i] = "R"
+        else:
+            CUBE[n]['faceString'][i] = "O"
+
+# Classify colors in specific range
+# W, Y, G, B, RO
+def classifyColor():
+    global CUBE, COLOR_CHROMATIC
+    cC = COLOR_CHROMATIC['C']; cH = COLOR_CHROMATIC['H']; cS = COLOR_CHROMATIC['S']
+    roList = []
+    
+    setCenterColor()
+
+    for n, obj in enumerate(CUBE):
+        for i, h, s, v in enumerate(obj['color']):
+            if s <= cS:
+                obj['faceString'][i] = findFaceUsingColor("W")
+            else:
+                if h < cH[0]:
+                    obj['faceString'][i] = "RO"
+                    roList.append((n, i, h + 181))
+                elif h >= cH[-1]:
+                    obj['faceString'][i] = "RO"
+                    tH, tS, tV = obj['color'][i]
+                    roList.append((n, i, tH))
+                else:
+                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[:1])):
+                        if lower <= h and h < upper:
+                            obj['faceString'][i] = findFaceUsingColor(colorStr)
+
+    classifyRedOrange(roList)
+
 # Clear cube faceString for renew calculation
 def clearCube():
     global CUBE
@@ -229,6 +306,9 @@ def cubeRecognize():
 
     # Grouping same color
     groupColor()
+    
+    # Classify specific range of color
+    classifyColor()
 
     # Print grouping color of each cube face
     for obj in CUBE:
@@ -362,6 +442,9 @@ def main():
         
         # Grouping same color
         groupColor()
+
+        # Classify specific range of color
+        classifyColor()
 
         # Print grouping color of each cube face
         for obj in CUBE:
