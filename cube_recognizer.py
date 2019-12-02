@@ -174,16 +174,16 @@ def setCenterColor():
 # Classify Red and Orange
 def classifyRedOrange(roList):
     global CUBE
-    face = len(CUBE[0]['color'])
 
-    if len(roList) != face * 2:
+    if len(roList) != 9 * 2:
         print("classify Red & Orange failed! length of roList is {}".format(len(roList)))
     
     sorted(roList, key=lambda x: x[-1])
 
     for k, n, i, c in enumerate(roList):
-        if k < length:
+        if k < 9:
             CUBE[n]['faceString'][i] = "R"
+            if i == 4: CUBE[n]['centerColor'] = "R"
         else:
             CUBE[n]['faceString'][i] = "O"
 
@@ -202,12 +202,9 @@ def classifyColor():
                 obj['faceString'][i] = findFaceUsingColor("W")
             else:
                 if h < cH[0]:
-                    obj['faceString'][i] = "RO"
                     roList.append((n, i, h + 181))
                 elif h >= cH[-1]:
-                    obj['faceString'][i] = "RO"
-                    tH, tS, tV = obj['color'][i]
-                    roList.append((n, i, tH))
+                    roList.append((n, i, h))
                 else:
                     for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[:1])):
                         if lower <= h and h < upper:
@@ -306,7 +303,7 @@ def cubeRecognize():
 
     # Grouping same color
     groupColor()
-    
+
     # Classify specific range of color
     classifyColor()
 
