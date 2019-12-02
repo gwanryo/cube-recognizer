@@ -186,6 +186,7 @@ def classifyRedOrange(roList):
             if i == 4: CUBE[n]['centerColor'] = "R"
         else:
             CUBE[n]['faceString'][i] = "O"
+            if i == 4: CUBE[n]['centerColor'] = "O"
 
 # Classify colors in specific range
 # W, Y, G, B, RO
