@@ -183,11 +183,15 @@ def classifyRedOrange(roList):
 
     for k, (n, i, c) in enumerate(roList):
         if k < 9:
-            CUBE[n]['faceString'][i] = "R"
-            if i == 4: CUBE[n]['centerColor'] = "R"
+            faceColor = findFaceUsingColor("R")
+            faceColor = faceColor if faceColor else str(i)
+            CUBE[n]['faceString'][i] = faceColor
+            if i == 4: CUBE[n]['centerColor'] = faceColor
         else:
-            CUBE[n]['faceString'][i] = "O"
-            if i == 4: CUBE[n]['centerColor'] = "O"
+            faceColor = findFaceUsingColor("O")
+            faceColor = faceColor if faceColor else str(i)
+            CUBE[n]['faceString'][i] = faceColor
+            if i == 4: CUBE[n]['centerColor'] = faceColor
 
 # Classify colors in specific range
 # W, Y, G, B, RO
@@ -260,8 +264,13 @@ def cubeRecognize():
         readConfig(CONFIG_FILE)
 
         CAMERAS = []
-        for u in CAMERA_URL:
-            CAMERAS.append(cv2.VideoCapture(u))
+        for i, u in enumerate(CAMERA_URL):
+            cap = cv2.VideoCapture(u)
+            if cap is None or not cap.isOpened():
+                print("Warning: Not valid streaming url, so try to use directly connected camera.")
+                CAMERAS.append(cv2.VideoCapture(i))
+            else:
+                CAMERAS.append(cv2.VideoCapture(u))
 
         for cam in CAMERAS:
             cam.set(3, CAMERA_WIDTH)    # cv2.CAP_PROP_FRAME_HEIGHT
@@ -305,9 +314,9 @@ def cubeRecognize():
 
         if __name__ == "__main__":
             showWindow(i, cam, frame, nY, nCr, nCb)
-
-        # Delay time for slow speed CPU
-        time.sleep(CAMERA_DELAY / len(CAMERAS))
+        else:
+            # Delay time for slow speed CPU
+            time.sleep(CAMERA_DELAY / len(CAMERAS))
 
     # Grouping same color
     groupColor()
