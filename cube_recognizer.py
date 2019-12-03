@@ -127,9 +127,9 @@ def saveColor(cubeObj, a, b, c):
 # Calculate distance in color
 def calDist(fromX, fromY, fromZ, toX, toY, toZ):
     return math.sqrt(
-        abs(fromX * fromX - toX * toX)
-        + abs(fromY * fromY - toY * toY)
-        + abs(fromZ * fromZ - toZ * toZ))
+        (fromX - toX) * (fromX - toX)
+        + (fromY - toY) * (fromY - toY)
+        + (fromZ - toZ) * (fromZ - toZ))
 
 # Grouping similar colors detected in camera
 def groupColor():
@@ -173,11 +173,11 @@ def setCenterColor():
                 if h < cH[0] or h >= cH[-1]:
                     if redOrange[0] != -1:
                         if h < redOrange[0]:
-                            obj['centerColor'] = "O"
-                            CUBE[n]['centerColor'] = "R"
-                        else:
                             obj['centerColor'] = "R"
-                            CUBE[n]['centerColor'] = "O"
+                            CUBE[redOrange[1]]['centerColor'] = "O"
+                        else:
+                            obj['centerColor'] = "O"
+                            CUBE[redOrange[1]]['centerColor'] = "R"
                     elif h < cH[0]:
                         redOrange = (h + 181, n)
                     elif h >= cH[-1]:
@@ -198,10 +198,10 @@ def classifyRedOrange(roList):
 
     for k, (n, i, c) in enumerate(roList):
         if k < 9:
-            faceColor = findFaceUsingColor("R")
+            faceColor = findFaceUsingColor("O")
             if faceColor: CUBE[n]['faceString'][i] = faceColor
         else:
-            faceColor = findFaceUsingColor("O")
+            faceColor = findFaceUsingColor("R")
             if faceColor: CUBE[n]['faceString'][i] = faceColor
 
 # Classify colors in specific range
@@ -335,6 +335,12 @@ def cubeRecognize():
     # Classify specific range of color
     classifyColor()
 
+    if __name__ == "__main__":
+        for obj in CUBE:
+            print("Face {} - {}, {}".format(obj['face'], obj['center'], obj['centerColor']))
+            for i, (h, s, v) in enumerate(obj['color']):
+                print("{} - ({}, {}, {})".format(i, h, s, v))
+
     # Print grouping color of each cube face
     for obj in CUBE:
         print(obj['face'] + '-' + ''.join(obj['faceString']))
@@ -371,25 +377,25 @@ def renderWindow(title, screen, x, y):
     cv2.imshow(title, screen)
     cv2.moveWindow(title, x, y)
 
-def showWindow(i, cam, bgr, nY, nCr, nCb):
+def showWindow(i, cam, bgr, a, b, c):
     # Define various camera view
     # Edit it if you want
     SCREENS = [
         [
-            'Camera{} - nY'.format(i), 
-            nY, 
+            'Camera{} - Alpha'.format(i), 
+            a, 
             RENDER_BASE_X + 0 * CAMERA_WIDTH, 
             RENDER_BASE_Y + i * (CAMERA_HEIGHT + RENDER_TITLEBAR_HEIGHT)
         ],
         [
-            'Camera{} - nCr'.format(i), 
-            nCr, 
+            'Camera{} - Beta'.format(i), 
+            b, 
             RENDER_BASE_X + 1 * CAMERA_WIDTH, 
             RENDER_BASE_Y + i * (CAMERA_HEIGHT + RENDER_TITLEBAR_HEIGHT)
         ],
         [
-            'Camera{} - nCb'.format(i), 
-            nCb, 
+            'Camera{} - Gamma'.format(i), 
+            c, 
             RENDER_BASE_X + 2 * CAMERA_WIDTH, 
             RENDER_BASE_Y + i * (CAMERA_HEIGHT + RENDER_TITLEBAR_HEIGHT)
         ],
@@ -419,6 +425,7 @@ This is main code for executing this library directly
 def main():
     while True:
         cubeRecognize()
+        time.sleep(1)
 
     cv2.destroyAllWindows()
 
