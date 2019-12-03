@@ -200,14 +200,10 @@ def classifyRedOrange(roList):
     for k, (n, i, c) in enumerate(roList):
         if k < 9:
             faceColor = findFaceUsingColor("R")
-            faceColor = faceColor if faceColor else str(i)
-            CUBE[n]['faceString'][i] = faceColor
-            if i == 4: CUBE[n]['centerColor'] = faceColor
+            if faceColor: CUBE[n]['faceString'][i] = faceColor
         else:
             faceColor = findFaceUsingColor("O")
-            faceColor = faceColor if faceColor else str(i)
-            CUBE[n]['faceString'][i] = faceColor
-            if i == 4: CUBE[n]['centerColor'] = faceColor
+            if faceColor: CUBE[n]['faceString'][i] = faceColor
 
 # Classify colors in specific range
 # W, Y, G, B, RO
