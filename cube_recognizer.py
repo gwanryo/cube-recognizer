@@ -218,7 +218,7 @@ def classifyColor():
         for i, (h, s, v) in enumerate(obj['color']):
             if s <= cS:
                 faceColor = findFaceUsingColor("W")
-                obj['faceString'][i] = faceColor if faceColor else str(i)
+                if faceColor: obj['faceString'][i] = faceColor
             else:
                 if h < cH[0]:
                     roList.append((n, i, h + 181))
@@ -228,7 +228,7 @@ def classifyColor():
                     for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
                         if lower <= h and h < upper:
                             faceColor = findFaceUsingColor(colorStr)
-                            obj['faceString'][i] = faceColor if faceColor else str(i)
+                            if faceColor: obj['faceString'][i] = faceColor
     
     if len(roList):
         classifyRedOrange(roList)
