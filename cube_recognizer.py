@@ -27,6 +27,7 @@ CAMERA_URL              = [             # Set camera streaming url
 ]
 
 CAMERA_DELAY            = 0.5           # Total camera delay
+CAMERA_OFFSET           = 1             # Camera offset when using directly connected camera
 CAMERA_WIDTH            = 320           # Width of camera
 CAMERA_HEIGHT           = 240           # Height of camera
 
@@ -50,8 +51,8 @@ def readConfig(file):
     with open(file, 'r') as f:
         config = json.load(f)
 
-    global CAMERA_URL, CAMERA_DELAY
-    CAMERA_URL = config['CAMERA_URL'], CAMERA_DELAY = config['CAMERA_DELAY']
+    global CAMERA_URL, CAMERA_DELAY, CAMERA_OFFSET
+    CAMERA_URL = config['CAMERA_URL'], CAMERA_DELAY = config['CAMERA_DELAY'], CAMERA_OFFSET = config['CAMERA_OFFSET']
 
     global CAMERA_WIDTH, CAMERA_HEIGHT
     CAMERA_WIDTH, CAMERA_HEIGHT = config['CAMERA_WIDTH'], config['CAMERA_HEIGHT']
@@ -270,7 +271,7 @@ def validate():
     return True
 
 def cubeRecognize():
-    global CAMERAS
+    global CAMERAS, CAMERA_OFFSET
 
     if len(CAMERAS) == 0:
         readConfig(CONFIG_FILE)
@@ -280,7 +281,7 @@ def cubeRecognize():
             cap = cv2.VideoCapture(u)
             if cap is None or not cap.isOpened():
                 print("Warning: Not valid streaming url, so try to use directly connected camera.")
-                CAMERAS.append(cv2.VideoCapture(i))
+                CAMERAS.append(cv2.VideoCapture(i + CAMERA_OFFSET))
             else:
                 CAMERAS.append(cv2.VideoCapture(u))
 
