@@ -152,24 +152,25 @@ def findFaceUsingColor(c):
         if obj['centerColor'] == c:
             return obj['face']
 
+    return None
+
 # Set center color using specific range
 def setCenterColor():
     global CUBE, COLOR_CHROMATIC
     cC = COLOR_CHROMATIC['C']; cH = COLOR_CHROMATIC['H']; cS = COLOR_CHROMATIC['S']
 
     for obj in CUBE:
-        h, s, v = CUBE['center']
+        h, s, v = obj['center']
         if obj['centerColor'] == "":
             if s <= cS:
                 obj['centerColor'] = "W"
             else:
-                for ch, cs, cv in obj['color']:
-                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[:1])):
-                        if lower <= ch and ch < upper:
+                if h < cH[0] or h >= cH[-1]:
+                    obj['centerColor'] = "RO"
+                else:
+                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
+                        if lower <= h and h < upper:
                             obj['centerColor'] = colorStr
-
-                    if ch < cH[0] or ch >= cH[-1]:
-                        obj['centerColor'] = "RO"
 
 # Classify Red and Orange
 def classifyRedOrange(roList):
@@ -180,7 +181,7 @@ def classifyRedOrange(roList):
     
     sorted(roList, key=lambda x: x[-1])
 
-    for k, n, i, c in enumerate(roList):
+    for k, (n, i, c) in enumerate(roList):
         if k < 9:
             CUBE[n]['faceString'][i] = "R"
             if i == 4: CUBE[n]['centerColor'] = "R"
@@ -198,20 +199,23 @@ def classifyColor():
     setCenterColor()
 
     for n, obj in enumerate(CUBE):
-        for i, h, s, v in enumerate(obj['color']):
+        for i, (h, s, v) in enumerate(obj['color']):
             if s <= cS:
-                obj['faceString'][i] = findFaceUsingColor("W")
+                faceColor = findFaceUsingColor("W")
+                obj['faceString'][i] = faceColor if faceColor else str(i)
             else:
                 if h < cH[0]:
                     roList.append((n, i, h + 181))
                 elif h >= cH[-1]:
                     roList.append((n, i, h))
                 else:
-                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[:1])):
+                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
                         if lower <= h and h < upper:
-                            obj['faceString'][i] = findFaceUsingColor(colorStr)
-
-    classifyRedOrange(roList)
+                            faceColor = findFaceUsingColor(colorStr)
+                            obj['faceString'][i] = faceColor if faceColor else str(i)
+    
+    if len(roList):
+        classifyRedOrange(roList)
 
 # Clear cube faceString for renew calculation
 def clearCube():
@@ -250,15 +254,18 @@ def validate():
     return True
 
 def cubeRecognize():
+    global CAMERAS
+
     if len(CAMERAS) == 0:
         readConfig(CONFIG_FILE)
 
-    for u in CAMERA_URL:
-        CAMERAS.append(cv2.VideoCapture(u))
+        CAMERAS = []
+        for u in CAMERA_URL:
+            CAMERAS.append(cv2.VideoCapture(u))
 
-    for cam in CAMERAS:
-        cam.set(3, CAMERA_WIDTH)    # cv2.CAP_PROP_FRAME_HEIGHT
-        cam.set(4, CAMERA_HEIGHT)   # cv2.CAP_PROP_FRAME_WIDTH
+        for cam in CAMERAS:
+            cam.set(3, CAMERA_WIDTH)    # cv2.CAP_PROP_FRAME_HEIGHT
+            cam.set(4, CAMERA_HEIGHT)   # cv2.CAP_PROP_FRAME_WIDTH
 
     for i, cam in enumerate(CAMERAS):
         _, frame = cam.read()
@@ -335,9 +342,9 @@ def recognize(num = 5, brightness = cl.LED_BRIGHTNESS):
         "cube": CUBE
     }
 
-
-if __name__ == "__main__":
-    main()
+#############################################
+#   Functions below are for main function   #
+#############################################
 
 # Render camera screen to window
 def renderWindow(title, screen, x, y):
@@ -390,65 +397,10 @@ def showWindow(i, cam, bgr, nY, nCr, nCb):
 This is main code for executing this library directly
 '''
 def main():
-    readConfig(CONFIG_FILE)
-
-    for i in range(CAMERA_OFFSET, CAMERA_OFFSET + CAMERA_QUANTITY + 1):
-        CAMERAS.append(cv2.VideoCapture(i))
-
-    for cam in CAMERAS:
-        cam.set(3, CAMERA_WIDTH)  # cv2.CAP_PROP_FRAME_HEIGHT
-        cam.set(4, CAMERA_HEIGHT)  # cv2.CAP_PROP_FRAME_WIDTH
-
     while True:
-        #clearCube()
-
-        for i, cam in enumerate(CAMERAS):
-            ret, frame = cam.read()
-
-            # Calculate YCrCb color range
-            YCrCb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
-            Y, Cr, Cb = cv2.split(YCrCb)
-            nY = cv2.normalize(Y, None, 0, 255, cv2.NORM_MINMAX)
-            nCr = cv2.normalize(Cr, None, 0, 255, cv2.NORM_MINMAX)
-            nCb = cv2.normalize(Cb, None, 0, 255, cv2.NORM_MINMAX)
-
-            # Calculate HSV color range
-            HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            H, S, V = cv2.split(HSV)
-            nH = cv2.normalize(H, None, 0, 255, cv2.NORM_MINMAX)
-            nS = cv2.normalize(S, None, 0, 255, cv2.NORM_MINMAX)
-            nV = cv2.normalize(V, None, 0, 255, cv2.NORM_MINMAX)
-
-            # Camera 1 = B, R, D
-            # Camera 2 = U, L, F
-            cubeObj = []
-            if i == 0:
-                cubeObj.append(CUBE[0])
-                cubeObj.append(CUBE[1])
-                cubeObj.append(CUBE[2])
-            else:
-                cubeObj.append(CUBE[3])
-                cubeObj.append(CUBE[4])
-                cubeObj.append(CUBE[5])
-            # ... Add something if you have more CAMERAS
-
-            # Write face info, and x, y value in camera view
-            drawPos(cubeObj, frame)
-
-            # Save center color, and 9 face colors
-            saveColor(cubeObj, nY, nCr, nCb)
-        
-        # Grouping same color
-        groupColor()
-
-        # Classify specific range of color
-        classifyColor()
-
-        # Print grouping color of each cube face
-        for obj in CUBE:
-            print(obj['face'] + '-' + ''.join(obj['faceString']))
-
-        # Delay time for slow speed CPU
-        time.sleep(CAMERA_DELAY / CAMERA_TIMES / len(CAMERAS))
+        cubeRecognize()
 
     cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+    main()
