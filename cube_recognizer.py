@@ -321,10 +321,10 @@ def cubeRecognize():
         drawPos(cubeObj, frame)
 
         # Save center color, and 9 face colors
-        saveColor(cubeObj, nY, nCr, nCb)
+        saveColor(cubeObj, nH, nS, nV)
 
         if __name__ == "__main__":
-            showWindow(i, cam, frame, nY, nCr, nCb)
+            showWindow(i, cam, frame, nH, nS, nV)
         else:
             # Delay time for slow speed CPU
             time.sleep(CAMERA_DELAY / len(CAMERAS))
