@@ -37,7 +37,7 @@ RENDER_TITLEBAR_HEIGHT  = 33            # Window Titlebar                       
 COLOR_AVERAGE_OFFSET    = 3             # Get average of color pixels in offset * offset square pixels
 COLOR_DISTANCE_OFFSET   = 50            # Distance offset of grouping same colors
 COLOR_CHROMATIC         = {             # To classify colors in specific range
-    "C": ["Y", "G", "B", "RO"],
+    "C": ["Y", "G", "B"],
     "H": [13, 45, 92, 150],
     "S": 70,
     "V": 0
@@ -51,7 +51,7 @@ def readConfig(file):
         config = json.load(f)
 
     global CAMERA_URL, CAMERA_DELAY
-    CAMERA_URL = config['CAMERA_URL']
+    CAMERA_URL = config['CAMERA_URL'], CAMERA_DELAY = config['CAMERA_DELAY']
 
     global CAMERA_WIDTH, CAMERA_HEIGHT
     CAMERA_WIDTH, CAMERA_HEIGHT = config['CAMERA_WIDTH'], config['CAMERA_HEIGHT']
@@ -67,6 +67,9 @@ def readConfig(file):
 
     global COLOR_DISTANCE_OFFSET
     COLOR_DISTANCE_OFFSET = config['COLOR_DISTANCE_OFFSET']
+
+    global COLOR_CHROMATIC
+    COLOR_CHROMATIC = config['COLOR_CHROMATIC']
 
     global CUBE
     CUBE = config['CUBE']
@@ -158,15 +161,28 @@ def findFaceUsingColor(c):
 def setCenterColor():
     global CUBE, COLOR_CHROMATIC
     cC = COLOR_CHROMATIC['C']; cH = COLOR_CHROMATIC['H']; cS = COLOR_CHROMATIC['S']
+    redOrange = (-1, 0)
 
-    for obj in CUBE:
+    for n, obj in enumerate(CUBE):
         h, s, v = obj['center']
         if obj['centerColor'] == "":
             if s <= cS:
                 obj['centerColor'] = "W"
             else:
                 if h < cH[0] or h >= cH[-1]:
-                    obj['centerColor'] = "RO"
+                    if redOrange[0] != -1:
+                        if h < redOrange[0]:
+                            obj['centerColor'] = "O"
+                            CUBE[n]['centerColor'] = "R"
+                        else:
+                            obj['centerColor'] = "R"
+                            CUBE[n]['centerColor'] = "O"
+                    elif h < cH[0]:
+                        redOrange[0] = h + 181
+                        redOrange[1] = n
+                    elif h >= cH[-1]:
+                        redOrange[0] = h
+                        redOrange[1] = n
                 else:
                     for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
                         if lower <= h and h < upper:
