@@ -52,7 +52,7 @@ def readConfig(file):
         config = json.load(f)
 
     global CAMERA_URL, CAMERA_DELAY, CAMERA_OFFSET
-    CAMERA_URL = config['CAMERA_URL'], CAMERA_DELAY = config['CAMERA_DELAY'], CAMERA_OFFSET = config['CAMERA_OFFSET']
+    CAMERA_URL, CAMERA_DELAY, CAMERA_OFFSET = config['CAMERA_URL'], config['CAMERA_DELAY'], config['CAMERA_OFFSET']
 
     global CAMERA_WIDTH, CAMERA_HEIGHT
     CAMERA_WIDTH, CAMERA_HEIGHT = config['CAMERA_WIDTH'], config['CAMERA_HEIGHT']
@@ -179,11 +179,9 @@ def setCenterColor():
                             obj['centerColor'] = "R"
                             CUBE[n]['centerColor'] = "O"
                     elif h < cH[0]:
-                        redOrange[0] = h + 181
-                        redOrange[1] = n
+                        redOrange = (h + 181, n)
                     elif h >= cH[-1]:
-                        redOrange[0] = h
-                        redOrange[1] = n
+                        redOrange = (h, n)
                 else:
                     for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
                         if lower <= h and h < upper:
