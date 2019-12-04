@@ -166,26 +166,25 @@ def setCenterColor():
 
     for n, obj in enumerate(CUBE):
         h, s, v = obj['center']
-        if obj['centerColor'] == "":
-            if s <= cS:
-                obj['centerColor'] = "W"
-            else:
-                if h < cH[0] or h >= cH[-1]:
-                    if h < cH[0]: h += 181
+        if s <= cS:
+            obj['centerColor'] = "W"
+        else:
+            if h < cH[0] or h >= cH[-1]:
+                if h < cH[0]: h += 181
 
-                    if redOrange[0] != -1:
-                        if h < redOrange[0]:
-                            obj['centerColor'] = "R"
-                            CUBE[redOrange[1]]['centerColor'] = "O"
-                        else:
-                            obj['centerColor'] = "O"
-                            CUBE[redOrange[1]]['centerColor'] = "R"
+                if redOrange[0] != -1:
+                    if h < redOrange[0]:
+                        obj['centerColor'] = "R"
+                        CUBE[redOrange[1]]['centerColor'] = "O"
                     else:
-                        redOrange = (h, n)
+                        obj['centerColor'] = "O"
+                        CUBE[redOrange[1]]['centerColor'] = "R"
                 else:
-                    for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
-                        if lower <= h and h < upper:
-                            obj['centerColor'] = colorStr
+                    redOrange = (h, n)
+            else:
+                for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
+                    if lower <= h < upper:
+                        obj['centerColor'] = colorStr
 
 # Classify Red and Orange
 def classifyRedOrange(roList):
@@ -226,7 +225,7 @@ def classifyColor():
                     roList.append((n, i, h))
                 else:
                     for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
-                        if lower <= h and h < upper:
+                        if lower <= h < upper:
                             faceColor = findFaceUsingColor(colorStr)
                             if faceColor: obj['faceString'][i] = faceColor
     
