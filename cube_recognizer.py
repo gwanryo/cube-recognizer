@@ -36,11 +36,11 @@ RENDER_BASE_Y           = 0             # Starting y points of camera view windo
 RENDER_TITLEBAR_HEIGHT  = 33            # Window Titlebar                               # Change it depends on your environment
 
 COLOR_AVERAGE_OFFSET    = 3             # Get average of color pixels in offset * offset square pixels
-COLOR_DISTANCE_OFFSET   = 50            # Distance offset of grouping same colors
+COLOR_DISTANCE_OFFSET   = 70            # Distance offset of grouping same colors
 COLOR_CHROMATIC         = {             # To classify colors in specific range
     "C": ["Y", "G", "B"],
-    "H": [13, 45, 92, 150],
-    "S": 70,
+    "H": [14, 50, 92, 140],
+    "S": 110,
     "V": 0
 }
 
@@ -197,6 +197,7 @@ def classifyRedOrange(roList):
     roList = sorted(roList, key=lambda x: x[-1])
 
     for k, (n, i, c) in enumerate(roList):
+        print("Face {} - {} : {}".format(CUBE[n]['face'], i, c))
         if k < 9:
             faceColor = findFaceUsingColor("O")
             if faceColor: CUBE[n]['faceString'][i] = faceColor
@@ -236,7 +237,8 @@ def classifyColor():
 def clearCube():
     global CUBE
     for obj in CUBE:
-        obj['faceString'] = [str(i) for i in range(0, 9)]
+        obj['faceString'] = [str(i) for i in range(9)]
+        obj['color'] = ['' for i in range(9)]
 
 def validate():
     # TODO: Validate if there is 9 tiles of each 6 colors,
@@ -291,11 +293,11 @@ def cubeRecognize():
         _, frame = cam.read()
 
         # Calculate YCrCb color range
-        YCrCb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
-        Y, Cr, Cb = cv2.split(YCrCb)
-        nY = cv2.normalize(Y, None, 0, 255, cv2.NORM_MINMAX)
-        nCr = cv2.normalize(Cr, None, 0, 255, cv2.NORM_MINMAX)
-        nCb = cv2.normalize(Cb, None, 0, 255, cv2.NORM_MINMAX)
+        #YCrCb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+        #Y, Cr, Cb = cv2.split(YCrCb)
+        #nY = cv2.normalize(Y, None, 0, 255, cv2.NORM_MINMAX)
+        #nCr = cv2.normalize(Cr, None, 0, 255, cv2.NORM_MINMAX)
+        #nCb = cv2.normalize(Cb, None, 0, 255, cv2.NORM_MINMAX)
 
         # Calculate HSV color range
         HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
