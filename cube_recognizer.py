@@ -122,7 +122,7 @@ def saveColor(cubeObj, a, b, c):
             else:
                 obj['color'][i] = (avgA, avgB, avgC)
 
-            if i == 4: obj['center'] = (avgA, avgB, avgC)
+            if i == 4: obj['center'] = obj['color'][i]
 
 # Calculate distance in color
 def calDist(fromX, fromY, fromZ, toX, toY, toZ):
@@ -171,6 +171,8 @@ def setCenterColor():
                 obj['centerColor'] = "W"
             else:
                 if h < cH[0] or h >= cH[-1]:
+                    if h < cH[0]: h += 181
+
                     if redOrange[0] != -1:
                         if h < redOrange[0]:
                             obj['centerColor'] = "R"
@@ -178,9 +180,7 @@ def setCenterColor():
                         else:
                             obj['centerColor'] = "O"
                             CUBE[redOrange[1]]['centerColor'] = "R"
-                    elif h < cH[0]:
-                        redOrange = (h + 181, n)
-                    elif h >= cH[-1]:
+                    else:
                         redOrange = (h, n)
                 else:
                     for colorStr, lower, upper in list(zip(cC, cH[:-1], cH[1:])):
@@ -194,7 +194,7 @@ def classifyRedOrange(roList):
     if len(roList) != 9 * 2:
         print("classify Red & Orange failed! length of roList is {}".format(len(roList)))
     
-    sorted(roList, key=lambda x: x[-1])
+    roList = sorted(roList, key=lambda x: x[-1])
 
     for k, (n, i, c) in enumerate(roList):
         if k < 9:
