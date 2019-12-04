@@ -254,8 +254,9 @@ def validate():
         for color in obj['faceString']:
             # Return false if faceString member has numerical value (initial value)
             try:
-                int(obj['faceString'])
+                color.replace('.', '', 1).isdigit()
             except:
+                print("Validation Fail - Numerical value")
                 return False
 
             if faceColor[color]:
@@ -265,7 +266,7 @@ def validate():
 
     for count in faceColor:
         if count != faceQuantity:
-            print("Validation Fail")
+            print("Validation Fail - Face quantity")
             return False
 
     print("Validation OK")
