@@ -35,7 +35,7 @@ RENDER_BASE_X           = 0             # Starting x points of camera view windo
 RENDER_BASE_Y           = 0             # Starting y points of camera view windows
 RENDER_TITLEBAR_HEIGHT  = 33            # Window Titlebar                               # Change it depends on your environment
 
-COLOR_AVERAGE_OFFSET    = 3             # Get average of color pixels in offset * offset square pixels
+COLOR_AVERAGE_OFFSET    = 5             # Get average of color pixels in offset * offset square pixels
 COLOR_DISTANCE_OFFSET   = 70            # Distance offset of grouping same colors
 COLOR_CHROMATIC         = {             # To classify colors in specific range
     "C": ["Y", "G", "B"],
@@ -80,7 +80,7 @@ def drawPos(cubeObj, screen):
     for obj in cubeObj:
         for i, pixel in enumerate(obj['pixel']):
             x = pixel[0]; y = pixel[1]
-            cv2.circle(screen, (x, y), 2, (0, 255, 0), -1)
+            cv2.circle(screen, (x, y), COLOR_AVERAGE_OFFSET, (0, 255, 0), -1)
             cv2.putText(screen, '{}{}'.format(obj['face'], i), #[{}, {}]'.format(obj['face'], i, x, y),
                 (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 0))
 
@@ -198,10 +198,10 @@ def classifyRedOrange(roList):
     for k, (n, i, c) in enumerate(roList):
         print("Face {} - {} : {}".format(CUBE[n]['face'], i, c))
         if k < 9:
-            faceColor = findFaceUsingColor("O")
+            faceColor = findFaceUsingColor("R")
             if faceColor: CUBE[n]['faceString'][i] = faceColor
         else:
-            faceColor = findFaceUsingColor("R")
+            faceColor = findFaceUsingColor("O")
             if faceColor: CUBE[n]['faceString'][i] = faceColor
 
 # Classify colors in specific range
@@ -265,8 +265,10 @@ def validate():
 
     for count in faceColor:
         if count != faceQuantity:
+            print("Validation Fail")
             return False
 
+    print("Validation OK")
     return True
 
 def cubeRecognize():
@@ -336,11 +338,10 @@ def cubeRecognize():
     # Classify specific range of color
     classifyColor()
 
-    if __name__ == "__main__":
-        for obj in CUBE:
-            print("Face {} - {}, {}".format(obj['face'], obj['center'], obj['centerColor']))
-            for i, (h, s, v) in enumerate(obj['color']):
-                print("{} - ({}, {}, {})".format(i, h, s, v))
+    for obj in CUBE:
+        print("Face {} - {}, {}".format(obj['face'], obj['center'], obj['centerColor']))
+        for i, (h, s, v) in enumerate(obj['color']):
+            print("{} - ({}, {}, {})".format(i, h, s, v))
 
     # Print grouping color of each cube face
     for obj in CUBE:
