@@ -262,7 +262,7 @@ def validate():
             try:
                 faceColor[color] += 1
             except:
-                faceColor[color] = 0
+                faceColor[color] = 1
 
     for key, count in faceColor.items():
         if count != faceQuantity:
