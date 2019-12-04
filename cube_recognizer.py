@@ -265,8 +265,10 @@ def validate():
                 faceColor[color] = 1
 
     for key, count in faceColor.items():
+        print("Face {}'s color quantity - {}".format(key, count))
+
+    for key, count in faceColor.items():
         if count != faceQuantity:
-            print("Validation Fail - Face {}'s quantity is {}".format(key, count))
             return False
 
     print("Validation OK")
