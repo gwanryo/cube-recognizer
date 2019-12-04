@@ -245,7 +245,7 @@ def validate():
     #       To modify cube info, you can remove farthest distance color.
     #       You can adjust led lights to clear camera's sight.
     global CUBE
-    faceColor = []
+    faceColor = {}
 
     for obj in CUBE:
         # Calculating face color quantity
@@ -264,9 +264,9 @@ def validate():
             else:
                 faceColor[color] = 0
 
-    for count in faceColor:
+    for key, count in faceColor.items():
         if count != faceQuantity:
-            print("Validation Fail - Face quantity")
+            print("Validation Fail - Face {}'s quantity is {}".format(key, count))
             return False
 
     print("Validation OK")
