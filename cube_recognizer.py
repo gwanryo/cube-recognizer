@@ -259,9 +259,9 @@ def validate():
                 print("Validation Fail - Numerical value")
                 return False
 
-            if faceColor[color]:
+            try:
                 faceColor[color] += 1
-            else:
+            except:
                 faceColor[color] = 0
 
     for key, count in faceColor.items():
